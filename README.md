@@ -2,13 +2,13 @@ MediaWiki Deployment in Kubernetes with Helm
 
 Table of Contents
 
-- #introduction
-- #prerequisites
-- #installation
-- #configuration
-- #deployment
-- #upgrading
-- #troubleshooting
+- introduction
+- prerequisites
+- installation
+- configuration
+- deployment
+- upgrading
+- troubleshooting
 
 Introduction
 
@@ -38,7 +38,7 @@ Deployment
 
 Upgrading
 
-1. Update values.yaml with new configuration
+1. Update values.yaml with  configuration
 2. Run helm upgrade mediawiki
 
 Troubleshooting
@@ -48,4 +48,12 @@ Troubleshooting
 
 Scaling Issues
 
-While MediaWiki can run smoothly in a single instance setup, scaling it on Kubernetes to handle increased load or ensure high availability can present certain challenges
+While MediaWiki can run smoothly in a single instance setup, scaling it on Kubernetes to handle increased load or ensure high availability can present certain challenges.
+-  A single MariaDB instance can become a bottleneck as traffic increases.
+-  Inefficient resource allocation can lead to performance issues or increased costs.
+
+Solutions
+
+ - Use managed database services (e.g., Amazon RDS, Google Cloud SQL) that offer built-in scalability and high availability.
+ - Set appropriate CPU and memory requests and limits in the Kubernetes deployment YAML to ensure efficient resource allocation
+

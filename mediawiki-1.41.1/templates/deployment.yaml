@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mediawiki.fullname" . }}
+  labels:
+    {{- include "mediawiki.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mediawiki.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mediawiki.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: MEDIAWIKI_DB_HOST
+              value: {{ template "mediawiki.fullname" . }}-mysql
+            - name: MEDIAWIKI_DB_USER
+              value: {{ .Values.mysql.user }}
+            - name: MEDIAWIKI_DB_PASSWORD
+              value: {{ .Values.mysql.password }}
+            - name: MEDIAWIKI_DB_NAME
+              value: {{ .Values.mysql.database }}
+          volumeMounts:
+            - name: mediawiki-data
+              mountPath: /var/www/html/images
+      volumes:
+        - name: mediawiki-data
+          persistentVolumeClaim:
+            claimName: mediawiki-pvc

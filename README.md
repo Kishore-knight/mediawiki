@@ -16,9 +16,9 @@ This repository contains the configuration files for deploying MediaWiki in Kube
 
 Prerequisites
 
-- Kubernetes cluster (version 1.22 or later)
-- Helm (version 3.8 or later)
-- MariaDB (version 10.6 or later)
+- Kubernetes cluster 
+- Helm 
+- MariaDB 
 
 Installation
 

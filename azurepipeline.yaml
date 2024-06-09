@@ -1,0 +1,58 @@
+trigger:
+- main
+
+variables:
+  imageName: 'myregistry.azurecr.io/mediawiki'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '5.x'
+        installationPath: $(Agent.ToolsDirectory)/dotnet
+    - script: |
+        docker build -t $(imageName):$(Build.BuildId) .
+      displayName: 'Build Docker Image'
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'myRegistry'
+        repository: $(imageName)
+        command: 'push'
+        tags: |
+          $(Build.BuildId)
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: HelmInstaller@1
+            inputs:
+              helmVersion: 'latest'
+          - script: |
+              helm repo add stable https://charts.helm.sh/stable
+              helm upgrade --install mediawiki ./mediawiki \
+                --set image.repository=$(imageName) \
+                --set image.tag=$(Build.BuildId) \
+                --set mariadb.rootPassword=$(mariadbRootPassword) \
+                --set mariadb.dbname=$(mariadbDbName) \
+                --set mariadb.username=$(mariadbUsername) \
+                --set mariadb.password=$(mariadbPassword)
+            env:
+              mariadbRootPassword: $(mariadbRootPassword)
+              mariadbDbName: $(mariadbDbName)
+              mariadbUsername: $(mariadbUsername)
+              mariadbPassword: $(mariadbPassword)
+            displayName: 'Deploy with Helm'

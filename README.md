@@ -22,14 +22,14 @@ Prerequisites
 
 Installation
 
-1. Clone this repository: `git clone (link unavailable)
-2. Install Helm: helm init
-3. Install MariaDB: helm install mariadb
+
+1. Install Helm: helm init
+2. Install MariaDB: helm install mariadb
 
 Configuration
 
 1. Edit values.yaml to configure MediaWiki settings
-2. Edit mariadb-configmap.yaml to configure MariaDB settings
+
 
 Deployment
 
@@ -45,3 +45,7 @@ Troubleshooting
 
 - Check Helm logs: helm logs
 - Check Kubernetes logs: kubectl logs
+
+Scaling Issues
+
+While MediaWiki can run smoothly in a single instance setup, scaling it on Kubernetes to handle increased load or ensure high availability can present certain challenges

@@ -26,9 +26,13 @@ stages:
       displayName: Git Short Commitin
       inputs:
         targetlyne: "inline"
-        script:
-          buildsha-$(git rev-parse-short-7 HEAD)
-          
+        script: |
+           buildsha=$(git rev-parse --short=7 HEAD)
+                buildDate=$(echo $(Build.BuildNumber) | cut -c 5-8)
+                buildNum=$(echo $(Build.BuildNumber) | cut -d. -f 2)
+                imagetag="${buildNum}-${buildDate}-${buildsha}"
+                echo $imagetag
+                echo "##vso[task.setvariable variable=imagetag]$imagetag"
     - task: Docker@z
       displayName: Build and publish image to Azure Container Registry
       inputs:

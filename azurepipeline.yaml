@@ -3,10 +3,10 @@
 trigger: none
 
 variables:
-    dockerRegistryServiceConnection: cdocastsouthcentralus33435nprdacr
-    imageRepository: askatt-saas-avatar
-    dockerfilePath: $(Build.SourcesDirectory)/dockerfile'
-    containerRegistry: 'cdocastsouthcentralus33435nprdacr.azurecr.io'
+    dockerRegistryServiceConnection: 'mediawikiclusterregistry'
+    imageRepository: 'mediawiki'
+    dockerfilePath: $(Build.SourcesDirectory)/mediawiki-1.41.1'
+    containerRegistry: 'mediawikiclusterregistry.azurecr.io'
 
 
 stages:
@@ -16,7 +16,7 @@ stages:
     job: Build
     displayName: Build job
     pool:
-      name: 33435-CAST-DevOps-scentus-UX-AgentPool
+      name: 'mediawiki'
     steps:
     - task: DockerInstaller@e
       inputs:
@@ -47,7 +47,7 @@ jobs:
 - job: Helm
   displayName: Helm job
   pool:
-    name: 33435-CAST-DevOps-scentus-UX-Agent: Pool
+    name: 'mediawiki'
   steps:
   - task: Copyfiles@2
     inputs:

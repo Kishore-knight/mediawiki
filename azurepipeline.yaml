@@ -1,58 +1,63 @@
-trigger:
-- main
+#This line define how we are going to trigger the pipeline
+
+trigger: none
 
 variables:
-  imageName: 'myregistry.azurecr.io/mediawiki'
+    dockerRegistryServiceConnection: cdocastsouthcentralus33435nprdacr
+    imageRepository: askatt-saas-avatar
+    dockerfilePath: $(Build.SourcesDirectory)/dockerfile'
+    containerRegistry: 'cdocastsouthcentralus33435nprdacr.azurecr.io'
+
 
 stages:
-- stage: Build
-  jobs:
-  - job: Build
+ -  stage: Build
+    displayName: Build and publish stage
+    jobs:
+    job: Build
+    displayName: Build job
     pool:
-      vmImage: 'ubuntu-latest'
+      name: 33435-CAST-DevOps-scentus-UX-AgentPool
     steps:
-    - task: UseDotNet@2
+    - task: DockerInstaller@e
       inputs:
-        packageType: 'sdk'
-        version: '5.x'
-        installationPath: $(Agent.ToolsDirectory)/dotnet
-    - script: |
-        docker build -t $(imageName):$(Build.BuildId) .
-      displayName: 'Build Docker Image'
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'myRegistry'
-        repository: $(imageName)
-        command: 'push'
-        tags: |
-          $(Build.BuildId)
+        dockerVersion: 17.09.0-ce
 
-- stage: Deploy
-  dependsOn: Build
-  jobs:
-  - deployment: Deploy
-    pool:
-      vmImage: 'ubuntu-latest'
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: HelmInstaller@1
-            inputs:
-              helmVersion: 'latest'
-          - script: |
-              helm repo add stable https://charts.helm.sh/stable
-              helm upgrade --install mediawiki ./mediawiki \
-                --set image.repository=$(imageName) \
-                --set image.tag=$(Build.BuildId) \
-                --set mariadb.rootPassword=$(mariadbRootPassword) \
-                --set mariadb.dbname=$(mariadbDbName) \
-                --set mariadb.username=$(mariadbUsername) \
-                --set mariadb.password=$(mariadbPassword)
-            env:
-              mariadbRootPassword: $(mariadbRootPassword)
-              mariadbDbName: $(mariadbDbName)
-              mariadbUsername: $(mariadbUsername)
-              mariadbPassword: $(mariadbPassword)
-            displayName: 'Deploy with Helm'
+    - task: Bash@3
+      displayName: Git Short Commitin
+      inputs:
+        targetlyne: "inline"
+        script:
+          buildsha-$(git rev-parse-short-7 HEAD)
+          
+    - task: Docker@z
+      displayName: Build and publish image to Azure Container Registry
+      inputs:
+        command: buildAndPush
+        containerkegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilelpath)
+        tags: |
+          $(imageTag)
+
+
+stage: Kubernetes Helm
+displayName: Kuberentes Helm
+dependson: []
+jobs:
+- job: Helm
+  displayName: Helm job
+  pool:
+    name: 33435-CAST-DevOps-scentus-UX-Agent: Pool
+  steps:
+  - task: Copyfiles@2
+    inputs:
+       sourcefolder: src/main/
+       contents: |
+          mediawiki/charts/*
+          mediawiki/templates/*
+          helm/*
+        targetFolder: '$(Build ArtifactStaging Directory)'
+  - task: PublishBuildArtifacts@l
+    inputs:
+      pathToPublish: 'S(Build ArtifactStaging@irectory)'
+      Artifactname: helm_package

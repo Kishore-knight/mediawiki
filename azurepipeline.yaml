@@ -51,11 +51,10 @@ jobs:
   steps:
   - task: Copyfiles@2
     inputs:
-       sourcefolder: src/main/
+       sourcefolder: mediawiki-1.41.1
        contents: |
-          mediawiki/charts/*
-          mediawiki/templates/*
-          helm/*
+          mediawiki-1.41.1/charts/*
+          mediawiki-1.41.1/templates/*
         targetFolder: '$(Build ArtifactStaging Directory)'
   - task: PublishBuildArtifacts@l
     inputs:
